@@ -34,10 +34,17 @@ server.use(restify.bodyParser());
 // var Word = mongoose.model('Word');
 
 
+function getTopRelations() {
+  // SORT items-set by items:* DESC
+}
+
+
 
 function getRelations(req, res, next) {
 
   client.set(req.params.name, "string val2", redis.print);
+  // client.incr(req.params.name+"_counter", "string val2", redis.print);
+
   // var message = new Word();
   // message.name = req.params.name;
   // message.count = 0;
@@ -63,15 +70,26 @@ function getRelations(req, res, next) {
  // console.log(output);
  // console.log(client.get(req.params.name));
 
+// how has using: http://stackoverflow.com/questions/5825485/how-to-get-count-of-values-in-redis-hash
+
+// our pratice
+// http://stackoverflow.com/questions/5118807/atomically-remove-an-item-from-set-if-a-counter-in-another-key-is-below-zero
+
+// list all
+// SMEMBERS items-set
+// get items:fooo
+
+//add one 
+// SADD "items-set" "fooo"
+
+// count up
+// INCR "items:foo0"
 
   client.get(req.params.name, function (err, result2) {
       res.send(result2);
   });
 
-
-
- // client.get(req.params.name, output);
- client.quit();
+  client.quit();
 }
 
 
