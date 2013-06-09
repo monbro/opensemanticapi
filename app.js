@@ -40,16 +40,83 @@ var wikipedia = restify.createJsonClient({
 // var Word = mongoose.model('Word');
 
 // Try do a request cronjob preparation
-wikipedia.get('/w/api.php?action=opensearch&search=michael&format=json&limit=10', function(err, req, res, data) {
-  // assert.ifError(err);
-  // console.log(req);
-  // console.log('%d -> %j', res.statusCode, res.headers);
-  // console.log('%s', data);
-  var firstTitle = data[1][0];
-  wikipedia.get('/w/api.php?rvprop=content&format=json&prop=revisions|categories&rvprop=content&action=query&titles='+firstTitle, function(err, req, res, data) {
-    console.log(data.query.pages[Object.keys(data.query.pages)[0]].revisions[0]["*"]);
+function wikiSearch(term) {
+  wikipedia.get('/w/api.php?action=opensearch&search='+term+'&format=json&limit=10', function(err, req, res, data) {
+    var firstTitle = data[1][0];
+    wikiGrab(firstTitle);
   });
-});
+}
+
+function wikiGrab(title) {
+  wikipedia.get('/w/api.php?rvprop=content&format=json&prop=revisions|categories&rvprop=content&action=query&titles='+title, function(err, req, res, data) {
+    var rawtext = data.query.pages[Object.keys(data.query.pages)[0]].revisions[0]["*"];
+    var parts = rawtext.split(/\n|\r/);
+    var snippets = [];
+
+    for (var i = parts.length - 1; i >= 0; i--) {
+      if(parts[i].length > 100) {
+        snippets.push(parts[i]);
+        analyzeText(parts[i]);
+        return;
+      }
+    }
+    console.log('Count of snippets: '+snippets.length);
+  });
+}
+
+function analyzeText(snippet) {
+   console.log(tokenize(snippet));
+}
+
+wikiSearch('michael');
+
+function tokenize(str) {
+ 
+   var punct='\\['+ '\\!'+ '\\"'+ '\\#'+ '\\$'+              // since javascript does not
+             '\\%'+ '\\&'+ '\\\''+ '\\('+ '\\)'+             // support POSIX character
+             '\\*'+ '\\+'+ '\\,'+ '\\\\'+ '\\-'+             // classes, we'll need our
+             '\\.'+ '\\/'+ '\\:'+ '\\;'+ '\\<'+              // own version of [:punct:]
+             '\\='+ '\\>'+ '\\?'+ '\\@'+ '\\['+
+             '\\]'+ '\\^'+ '\\_'+ '\\`'+ '\\{'+
+             '\\|'+ '\\}'+ '\\~'+ '\\]',
+ 
+       re=new RegExp(                                        // tokenizer
+          '\\s*'+            // discard possible leading whitespace
+          '('+               // start capture group #1
+            '\\.{3}'+            // ellipsis (must appear before punct)
+          '|'+               // alternator
+            '\\s+\\-\\s+'+       // hyphenated words (must appear before punct)
+          '|'+               // alternator
+            '\\s+\'(?:\\s+)?'+   // compound words (must appear before punct)
+          '|'+               // alternator
+            '\\s+'+              // other words
+          '|'+               // alternator
+            '['+punct+']'+        // punct
+          ')'                // end capture group
+        );
+ 
+   // grep(ary[,filt]) - filters an array
+   //   note: could use jQuery.grep() instead
+   // @param {Array}    ary    array of members to filter
+   // @param {Function} filt   function to test truthiness of member,
+   //   if omitted, "function(member){ if(member) return member; }" is assumed
+   // @returns {Array}  all members of ary where result of filter is truthy
+ 
+   function grep(ary,filt) {
+     var result=[];
+     for(var i=0,len=ary.length;i++<len;) {
+       var member=ary[i]||'';
+       if(filt && (typeof filt === 'Function') ? filt(member) : member) {
+         result.push(member);
+       }
+     }
+     return result;
+   }
+ 
+   return grep( str.split(re) );   // note: filter function omitted 
+                                   //       since all we need to test 
+                                   //       for is truthiness
+} // end tokenize()
 
 // Base Class
 ///////////////////////////////////////////////////////
