@@ -1,0 +1,14 @@
+{
+  "name": "opensemanticapi",
+  "description": "openapi",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "3.x",
+    "restify": "2.5.1",
+    "mongoose": "2.6.x",
+    "redis": "0.8.3",
+    "underscore": "1.4.4",
+    "jquery": "1.8.3"
+  }
+}
