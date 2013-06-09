@@ -1,4 +1,5 @@
 var restify = require('restify');
+var express = require('express');
 var config = require('./config.js');
 // var mongoose = require('mongoose');
 
@@ -21,6 +22,11 @@ var client = redis.createClient();
 var server = restify.createServer();
 server.use(restify.bodyParser());
 
+var wikipedia = restify.createJsonClient({
+  url: 'http://de.wikipedia.org',
+  version: '*'
+});
+
 // db = mongoose.connect(config.creds.mongoose_auth_local),
 // Schema = mongoose.Schema;
 
@@ -33,16 +39,101 @@ server.use(restify.bodyParser());
 // mongoose.model('Word', WordSchema);
 // var Word = mongoose.model('Word');
 
+// Try do a request cronjob preparation
+wikipedia.get('/w/api.php?action=opensearch&search=michael&format=json&limit=10', function(err, req, res, data) {
+  // assert.ifError(err);
+  // console.log(req);
+  // console.log('%d -> %j', res.statusCode, res.headers);
+  // console.log('%s', data);
+  var firstTitle = data[1][0];
+  wikipedia.get('/w/api.php?rvprop=content&format=json&prop=revisions|categories&rvprop=content&action=query&titles='+firstTitle, function(err, req, res, data) {
+    console.log(data.query.pages[Object.keys(data.query.pages)[0]].revisions[0]["*"]);
+  });
+});
 
-function getTopRelations() {
-  // SORT items-set by items:* DESC
+// Base Class
+///////////////////////////////////////////////////////
+function Base(val) {
+
+  // Store variables
+  var that = this,
+      res;
+
+  this.setRes = function(val) {
+    res = val;
+  };
+
+  // Public functions
+  this.getTopRelations = function() {
+    // SORT items-set by items:* DESC
+
+
+    var all_users = [];
+    // Get all the users for this page.
+
+    client.sort(val, "by", val+":*", 'DESC', "get", "#", function (err, items) {
+      // client.get(val+':'+items[0],function (err, item) {
+      //   console.log(item);
+      // });
+      // console.log(items);
+      doResponse(items,res);
+    });
+
+  //   client.smembers(val, function (err, items ) {
+  //     // Now get the name of each of those users.
+  //     // console.log(items);
+
+  //     for (var i = 0; i < items.length; i++) {
+  //       console.log(items[i]);
+  //     }
+
+
+  //     // for (var i = 0; i < user_ids.length; i++) {
+  //     //  client.get(val + user_ids[i], function(err, count) {
+  //     //    var myobj = {};
+  //     //    myobj[user_ids[i]] = count;
+  //     //    all_users.push(myobj);
+  //     //       if (i === (user_ids.length - 1)) {
+  //     //          // console.log(all_users);
+  //     //          doResponse(all_users,res);
+  //     //       }
+  //     //   });
+  //     // }
+  //   });
+
+  };
+
+  // add word and count up
+  this.pushRelation = function(rel) {
+    client.sadd(val, rel);
+    // starts with 1 if not set
+    client.incr(val+':'+rel);
+
+    if(rel == 'eins') {
+      client.incr(val+':'+rel);
+    }
+  };
+
+  this.setTestData = function() {
+    that.pushRelation('eins');
+    that.pushRelation('zwo');
+    that.pushRelation('dree');
+
+    client.get(val+':eins', function (err, result3) {
+      console.log(result3);
+      doResponse(result3,res);
+    });
+  };
+
 }
 
-
+function doResponse(data, res) {
+  res.send(data);
+}
 
 function getRelations(req, res, next) {
 
-  client.set(req.params.name, "string val2", redis.print);
+  // client.set(req.params.name, "string val2", redis.print);
   // client.incr(req.params.name+"_counter", "string val2", redis.print);
 
   // var message = new Word();
@@ -85,18 +176,27 @@ function getRelations(req, res, next) {
 // count up
 // INCR "items:foo0"
 
-  client.get(req.params.name, function (err, result2) {
-      res.send(result2);
-  });
+  // client.get(req.params.name, function (err, result2) {
+  //     // res.send(result2);
 
-  client.quit();
+  // });
+
+  var base = new Base(req.params.name);
+  base.setRes(res);
+  base.getTopRelations();
+  // client.quit();
 }
 
-
-
+function setTestData(req, res, next) {
+  var base = new Base(req.params.name);
+  base.setRes(res);
+  base.setTestData();
+  // client.quit();
+}
 
 // Set up our routes and start the server
-server.get('/keyword/:name', getRelations);
+server.get('/relations/:name', getRelations);
+server.get('/settestdata/:name', setTestData);
 
 server.listen(8080, function() {
   console.log('%s listening at %s', server.name, server.url);
