@@ -3,6 +3,8 @@ opensemanticapi
 
 Will allow you to create your own semantic wording database with redis. Otherwise there will be a open api to get related words by meaning.
 
+**Example (http://localhost:8080/relations/hund):**
+
 Current Input:
 
 * "hund" (german word)
@@ -15,3 +17,9 @@ To Do:
 
 * Remove all conjunctions and stuff
 * improve performance of script
+
+** USAGE **
+
+* start your redis server on a disc with enough space
+* open the app via "node app.js"
+* happy output watching
