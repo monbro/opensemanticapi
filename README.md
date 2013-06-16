@@ -18,7 +18,7 @@ To Do:
 * Remove all conjunctions and stuff
 * improve performance of script
 
-** USAGE **
+**USAGE**
 
 * start your redis server on a disc with enough space
 * open the app via "node app.js"
