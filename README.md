@@ -16,7 +16,7 @@ Will allow you to create your own semantic wording database with redis. Otherwis
 **2. Example (http://localhost:8080/relations/schiff):**
 
 * Input: "schiff" (german word)
-* 
+
 * Output: ["der", "die", "und", "mit", "das", "von", "den", "auf", "nach", "dem", "ein", "als", "des", "gulliver", "ist", "nbsp", "für", "einem", "wurde", "eine", "wird", "bremerhaven", "sich", "ref", "dass", "war", "bei", "werden", "sie", "europa", "aus", "bis", "ihn", "hafen", "über", "wieder", "einer", "durch", "bremen", "auch", "zum", "wurden", "vor", "seute", "einen", "deern", "bark", "schiffes", "oder", "kam", "insel", "wilhelm", "wasser", "sind", "mini", "ihm", "hat", "datei", "anderen", "unter", "nicht", "man", "kaub", "jpg", "eines", "bandi", "zur", "wie", "wappen", "seiner", "seinem", "seine", "schließlich", "ostsee", "namen", "menschen", "können", "kaiser", "juni", "januar", "heute", "gegen", "findet", "erste", "drei", "diese", "damit", "band", "bald", "args", "aber", "000", "zwei", "www", "wegen", "tonnen", "tage", "staffel", "stadt", "sowie", "seinen", "see", "schiffe", "pegel", "oktober", "noch", "mark", "mainz", "lloyd", "liliputaner", "leben", "land", "koerts", "jedoch", "ihrem", "http", "hamburg", "große", "gerät", "gebaut"]
 
 **To Do:**
