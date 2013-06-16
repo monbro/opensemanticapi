@@ -140,6 +140,10 @@ function analyzeText(snippet) {
 
   $.each(obj, function(index, value) {
     // console.log(index + ': ' + value);
+
+    if(typeof index == 'undefined')
+      return; // skip to next
+
     base = new Base(index.toLowerCase());
     $.each(obj, function(index2, value2) {
       if(index != index2) {
