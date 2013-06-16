@@ -8,6 +8,8 @@ var redis = require("redis");
 var _ = require("underscore");
 var $ = require("jquery");
 var client = redis.createClient();
+var multi;
+// var stream = client.stream(); 
 
 // client.set("string key", "string val", redis.print);
 // client.hset("hash key", "hashtest 1", "some value", redis.print);
@@ -42,7 +44,7 @@ var wikipedia = restify.createJsonClient({
 
 // Try do a request cronjob preparation
 function wikiSearch(term) {
-  wikipedia.get('/w/api.php?action=opensearch&search='+escape(term)+'&format=json&limit=10', function(err, req, res, data) {
+  wikipedia.get('/w/api.php?action=opensearch&search='+escape(term)+'&format=json&limit=3', function(err, req, res, data) {
 
     // console.log(err);
     // console.log(data);
@@ -119,6 +121,9 @@ function goToNext() {
 function analyzeText(snippet) {
   var words = tools.tokenize(snippet);
   var obj = {};
+
+  multi = client.multi();
+
   for (var i = words.length - 1; i >= 0; i--) {
 
     if(typeof obj[words[i]] == 'undefined')
@@ -126,7 +131,7 @@ function analyzeText(snippet) {
     else
       obj[words[i]]++;
 
-    client.sadd('____sites2do____',words[i]);
+    multi.sadd('____sites2do____',words[i]);
 
     // console.log(words[i].toLowerCase()+' - '+words[j].toLowerCase()+' - '+similar_text(words[i].toLowerCase(),words[j].toLowerCase(),1));
   }
@@ -135,19 +140,31 @@ function analyzeText(snippet) {
 
   $.each(obj, function(index, value) {
     // console.log(index + ': ' + value);
-
+    base = new Base(index.toLowerCase());
     $.each(obj, function(index2, value2) {
-      base = new Base(index.toLowerCase());
       if(index != index2) {
         base.pushRelation(index2.toLowerCase(),value2);
       }
     });
+    base.save();
 
     // add to our general 'ALL' collection, to identify the most used words of all
-    client.sadd('____all____', index.toLowerCase());
-    client.incrby('____all____'+':'+index.toLowerCase(), value);
+    multi.sadd('____all____', index.toLowerCase());
+    multi.incrby('____all____'+':'+index.toLowerCase(), value);
+
+//     client.multi()
+// .hmset(randKey, {"author": params.author,
+// "quote": params.quote})
+// .sadd('Author:' + params.author, randKey)
+
+// .exec(function (err, replies) {
+// if (err) { throw err; };
+// if (replies[0] == "OK") { console.log('Added...\n'); }
+// });
 
   });
+
+  multi.exec();
 
 }
 
@@ -164,16 +181,20 @@ function Base(val) {
 
   // Store variables
   var that = this,
+      multi_in = client.multi(),
       res;
 
   this.setRes = function(val) {
     res = val;
   };
 
+  this.save = function() {
+    multi_in.exec();
+  };
+
   // Public functions
   this.getTopRelations = function() {
     // SORT items-set by items:* DESC
-
 
     var all_users = [];
     // Get all the users for this page.
@@ -212,19 +233,13 @@ function Base(val) {
 
   // add word and count up
   this.pushRelation = function(rel, incr) {
-    client.sadd(val, rel);
+    multi_in.sadd(val, rel);
 
     if(typeof incr == 'undefined') {
       incr = 1;
     }
+    multi_in.incrby(val+':'+rel, incr);
 
-    // starts with 1 if not set
-    // console.log(val+':'+rel);
-    client.incrby(val+':'+rel, incr);
-
-    // if(rel == 'eins') {
-    //   client.incr(val+':'+rel);
-    // }
   };
 
   this.setTestData = function() {
