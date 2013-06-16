@@ -16,6 +16,6 @@ Will allow you to create your own semantic wording database with redis. Otherwis
 
 **USAGE**
 
-* start your redis server on a disc with enough space
+* start your redis server on a disk with enough space
 * open the app via "node app.js"
 * happy output watching
