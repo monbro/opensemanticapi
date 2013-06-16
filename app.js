@@ -1,6 +1,7 @@
 var restify = require('restify');
 var express = require('express');
 var config = require('./config.js');
+var tools = require('./lib/tools');
 // var mongoose = require('mongoose');
 
 var redis = require("redis");
@@ -41,82 +42,121 @@ var wikipedia = restify.createJsonClient({
 
 // Try do a request cronjob preparation
 function wikiSearch(term) {
-  wikipedia.get('/w/api.php?action=opensearch&search='+term+'&format=json&limit=10', function(err, req, res, data) {
+  wikipedia.get('/w/api.php?action=opensearch&search='+escape(term)+'&format=json&limit=10', function(err, req, res, data) {
+
+    // console.log(err);
+    // console.log(data);
+
+    if(typeof data[1] == 'undefined' || typeof data[1][0] == 'undefined') {
+      console.log('No page found in wikipedia for '+req.path);
+      client.srem('____sites2do____',term);
+      goToNext();
+      return;
+    }
+
     var firstTitle = data[1][0];
-    wikiGrab(firstTitle);
+
+    client.sadd('____sites____', firstTitle, function (err, result) {
+      if(result) {
+        wikiGrab(firstTitle);
+        client.srem('____sites2do____',firstTitle);
+      }
+      else {
+        console.log(firstTitle+' was crawled already!');
+        goToNext();
+        return false;
+      }
+    });
+
+    // add all sites to queue
+    for (var i = data[1].length - 1; i >= 0; i--) {
+      client.sadd('____sites2do____',data[1][i]);
+    }
+
   });
 }
 
 function wikiGrab(title) {
-  wikipedia.get('/w/api.php?rvprop=content&format=json&prop=revisions|categories&rvprop=content&action=query&titles='+title, function(err, req, res, data) {
+  wikipedia.get('/w/api.php?rvprop=content&format=json&prop=revisions|categories&rvprop=content&action=query&titles='+escape(title), function(err, req, res, data) {
+    if(typeof data.query == 'undefined') {
+      goToNext();
+      return false;
+    }
+
+    if(typeof data.query.pages[Object.keys(data.query.pages)[0]].revisions == 'undefined') {
+      goToNext();
+      return false;
+    }
+
     var rawtext = data.query.pages[Object.keys(data.query.pages)[0]].revisions[0]["*"];
     var parts = rawtext.split(/\n|\r/);
     var snippets = [];
 
+    console.log('going to http://de.wikipedia.org/wiki/'+title);
+
     for (var i = parts.length - 1; i >= 0; i--) {
-      if(parts[i].length > 100) {
+      if(parts[i].length > 120) {
         snippets.push(parts[i]);
+
+        // analyze full text block
         analyzeText(parts[i]);
-        return;
+      }
+      if(i === 0) {
+        goToNext();
       }
     }
     console.log('Count of snippets: '+snippets.length);
   });
 }
 
-function analyzeText(snippet) {
-   console.log(tokenize(snippet));
+function goToNext() {
+  console.log('NEXT');
+  client.srandmember('____sites2do____', function (err, result) {
+    wikiSearch(result);
+  });
 }
 
-wikiSearch('michael');
+function analyzeText(snippet) {
+  var words = tools.tokenize(snippet);
+  var obj = {};
+  for (var i = words.length - 1; i >= 0; i--) {
 
-function tokenize(str) {
- 
-   var punct='\\['+ '\\!'+ '\\"'+ '\\#'+ '\\$'+              // since javascript does not
-             '\\%'+ '\\&'+ '\\\''+ '\\('+ '\\)'+             // support POSIX character
-             '\\*'+ '\\+'+ '\\,'+ '\\\\'+ '\\-'+             // classes, we'll need our
-             '\\.'+ '\\/'+ '\\:'+ '\\;'+ '\\<'+              // own version of [:punct:]
-             '\\='+ '\\>'+ '\\?'+ '\\@'+ '\\['+
-             '\\]'+ '\\^'+ '\\_'+ '\\`'+ '\\{'+
-             '\\|'+ '\\}'+ '\\~'+ '\\]',
- 
-       re=new RegExp(                                        // tokenizer
-          '\\s*'+            // discard possible leading whitespace
-          '('+               // start capture group #1
-            '\\.{3}'+            // ellipsis (must appear before punct)
-          '|'+               // alternator
-            '\\s+\\-\\s+'+       // hyphenated words (must appear before punct)
-          '|'+               // alternator
-            '\\s+\'(?:\\s+)?'+   // compound words (must appear before punct)
-          '|'+               // alternator
-            '\\s+'+              // other words
-          '|'+               // alternator
-            '['+punct+']'+        // punct
-          ')'                // end capture group
-        );
- 
-   // grep(ary[,filt]) - filters an array
-   //   note: could use jQuery.grep() instead
-   // @param {Array}    ary    array of members to filter
-   // @param {Function} filt   function to test truthiness of member,
-   //   if omitted, "function(member){ if(member) return member; }" is assumed
-   // @returns {Array}  all members of ary where result of filter is truthy
- 
-   function grep(ary,filt) {
-     var result=[];
-     for(var i=0,len=ary.length;i++<len;) {
-       var member=ary[i]||'';
-       if(filt && (typeof filt === 'Function') ? filt(member) : member) {
-         result.push(member);
-       }
-     }
-     return result;
-   }
- 
-   return grep( str.split(re) );   // note: filter function omitted 
-                                   //       since all we need to test 
-                                   //       for is truthiness
-} // end tokenize()
+    if(typeof obj[words[i]] == 'undefined')
+      obj[words[i]] = 1;
+    else
+      obj[words[i]]++;
+
+    client.sadd('____sites2do____',words[i]);
+
+    // console.log(words[i].toLowerCase()+' - '+words[j].toLowerCase()+' - '+similar_text(words[i].toLowerCase(),words[j].toLowerCase(),1));
+  }
+
+  // console.log(obj);
+
+  $.each(obj, function(index, value) {
+    // console.log(index + ': ' + value);
+
+    $.each(obj, function(index2, value2) {
+      base = new Base(index.toLowerCase());
+      if(index != index2) {
+        base.pushRelation(index2.toLowerCase(),value2);
+      }
+    });
+
+    // add to our general 'ALL' collection, to identify the most used words of all
+    client.sadd('____all____', index.toLowerCase());
+    client.incrby('____all____'+':'+index.toLowerCase(), value);
+
+  });
+
+}
+
+wikiSearch('datenbank');
+
+// 2do:
+// remove bindewürter und wir ihr sie etc.
+// crawl all wikipedia links upcoming in this article
+
 
 // Base Class
 ///////////////////////////////////////////////////////
@@ -138,7 +178,7 @@ function Base(val) {
     var all_users = [];
     // Get all the users for this page.
 
-    client.sort(val, "by", val+":*", 'DESC', "get", "#", function (err, items) {
+    client.sort(val, "by", val+":*", 'LIMIT', 0, 60, 'DESC', "get", "#", function (err, items) {
       // client.get(val+':'+items[0],function (err, item) {
       //   console.log(item);
       // });
@@ -171,14 +211,20 @@ function Base(val) {
   };
 
   // add word and count up
-  this.pushRelation = function(rel) {
+  this.pushRelation = function(rel, incr) {
     client.sadd(val, rel);
-    // starts with 1 if not set
-    client.incr(val+':'+rel);
 
-    if(rel == 'eins') {
-      client.incr(val+':'+rel);
+    if(typeof incr == 'undefined') {
+      incr = 1;
     }
+
+    // starts with 1 if not set
+    // console.log(val+':'+rel);
+    client.incrby(val+':'+rel, incr);
+
+    // if(rel == 'eins') {
+    //   client.incr(val+':'+rel);
+    // }
   };
 
   this.setTestData = function() {
@@ -193,6 +239,7 @@ function Base(val) {
   };
 
 }
+
 
 function doResponse(data, res) {
   res.send(data);
