@@ -1,6 +1,8 @@
 opensemanticapi
 ===============
 
+**Works with NodeJS and Redis - v0.1**
+
 Will allow you to create your own semantic wording database with redis. Otherwise there will be a open api to get related words by meaning.
 
 **Example (http://localhost:8080/relations/hund):**
