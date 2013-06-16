@@ -178,7 +178,7 @@ function Base(val) {
     var all_users = [];
     // Get all the users for this page.
 
-    client.sort(val, "by", val+":*", 'LIMIT', 0, 60, 'DESC', "get", "#", function (err, items) {
+    client.sort(val, "by", val+":*", 'LIMIT', 0, 120, 'DESC', "get", "#", function (err, items) {
       // client.get(val+':'+items[0],function (err, item) {
       //   console.log(item);
       // });
