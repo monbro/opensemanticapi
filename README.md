@@ -19,6 +19,12 @@ Will allow you to create your own semantic wording database with redis. Otherwis
 
 * Output: ["der", "die", "und", "mit", "das", "von", "den", "auf", "nach", "dem", "ein", "als", "des", "gulliver", "ist", "nbsp", "für", "einem", "wurde", "eine", "wird", "bremerhaven", "sich", "ref", "dass", "war", "bei", "werden", "sie", "europa", "aus", "bis", "ihn", "hafen", "über", "wieder", "einer", "durch", "bremen", "auch", "zum", "wurden", "vor", "seute", "einen", "deern", "bark", "schiffes", "oder", "kam", "insel", "wilhelm", "wasser", "sind", "mini", "ihm", "hat", "datei", "anderen", "unter", "nicht", "man", "kaub", "jpg", "eines", "bandi", "zur", "wie", "wappen", "seiner", "seinem", "seine", "schließlich", "ostsee", "namen", "menschen", "können", "kaiser", "juni", "januar", "heute", "gegen", "findet", "erste", "drei", "diese", "damit", "band", "bald", "args", "aber", "000", "zwei", "www", "wegen", "tonnen", "tage", "staffel", "stadt", "sowie", "seinen", "see", "schiffe", "pegel", "oktober", "noch", "mark", "mainz", "lloyd", "liliputaner", "leben", "land", "koerts", "jedoch", "ihrem", "http", "hamburg", "große", "gerät", "gebaut"]
 
+**3. Example (http://localhost:8080/relations/mensch):**
+
+* Input: "mensch" (german word)
+
+* Output: ["der", "und", "die", "ref", "von", "ist", "des", "den", "das", "als", "ein", "eine", "sich", "auch", "mit", "auf", "dem", "für", "menschen", "nicht", "dass", "wie", "oder", "nbsp", "aus", "wird", "zur", "durch", "werden", "sie", "sind", "nach", "vor", "http", "diese", "kann", "über", "nur", "bei", "www", "hat", "seine", "homo", "sondern", "wurde", "seiner", "the", "einen", "sapiens", "einer", "einem", "zwischen", "war", "noch", "bis", "aber", "zum", "jahren", "was", "jedoch", "jahr", "vom", "sowie", "sein", "name", "etwa", "erziehung", "dieser", "000", "wurden", "unter", "wissenschaft", "man", "haben", "chromosomen", "art", "pdf", "ihm", "beim", "zeit", "seit", "sei", "jahre", "html", "heute", "gibt", "erst", "eines", "and", "wenn", "spiegel", "pädagogik", "online", "menschlichen", "mehr", "jahrhundert", "isbn", "giacometti", "evolution", "biologie", "bezeichnet", "bereits", "anthropologie", "anderen", "2011", "sehr", "ohne", "leben", "immer", "ihre", "gut", "entwicklung", "andere", "zwei", "sinne", "seines", "science", "philosophie", "lebens", "kultur"]
+
 **To Do:**
 
 * Remove all conjunctions and stuff
