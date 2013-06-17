@@ -29,3 +29,4 @@ Will allow you to create your own semantic wording database with redis. Otherwis
 * start your redis server on a disk with enough space
 * open the app via "node app.js"
 * happy output watching
+* try to use http://yeoman.io/ with its structure for more compatibility and understanding
