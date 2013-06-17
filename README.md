@@ -23,10 +23,10 @@ Will allow you to create your own semantic wording database with redis. Otherwis
 
 * Remove all conjunctions and stuff
 * improve performance of script
+* try to use http://yeoman.io/ with its structure for more compatibility and understanding
 
 **USAGE**
 
 * start your redis server on a disk with enough space
 * open the app via "node app.js"
 * happy output watching
-* try to use http://yeoman.io/ with its structure for more compatibility and understanding
