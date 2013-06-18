@@ -9,19 +9,23 @@ Will allow you to create your own semantic wording database with redis. Otherwis
 
 ![ScreenShot](https://raw.github.com/monbro/opensemanticapi/master/infographic.png)
 
-**1. Example after 1h collecting (http://localhost:8080/relations/ship):**
+**Examples**
+
+The following examples where given after the system was collecting for about one hour only.
+
+**1. Example (http://localhost:8080/relations/ship):**
 
 * Input: "ship"
 
 * Output: ["midshipmen", "aboard", "ships", "rating", "master", "served", "seaman", "sea", "officers", "santa", "sailing", "cadets", "able", "sail", "navigation", "lieutenant", "hms", "expected", "yahoo", "storm", "rated", "promotion", "maría", "lewis", "false", "era", "boys", "wind", "voyage", "volunteer", "servants", "required", "passing", "palos"]
 
-**2. Example after 1h collecting (http://localhost:8080/relations/human):**
+**2. Example (http://localhost:8080/relations/human):**
 
 * Input: human
 
 * Output: ["evolution", "humans", "reality", "primate", "ago", "tools", "pmid", "mind"]
 
-**3. Example after 1h collecting (http://localhost:8080/relations/dog):**
+**3. Example (http://localhost:8080/relations/dog):**
 
 * Input: dog
 
