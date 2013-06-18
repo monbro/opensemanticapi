@@ -27,16 +27,16 @@ Will allow you to create your own semantic wording database with redis. Otherwis
 
 * Output: ["infant", "wildlife", "offspring", "mother", "future", "southwest", "koalas", "conflict", "animals", "aitken", "wolf", "urban", "rehabilitation", "pet", "perspective", "nursing", "mexico", "evolutionary", "weaning", "ticket", "texas", "speech", "special", "retrospective", "primate", "holtcamp", "fund", "enough", "domestic", "cost", "arizona", "210–217", "variety", "trivers", "trauma", "terms", "sprawl", "southwestern", "sense", "river", "received", "questions", "point", "perhaps", "parent", "otter", "makes", "little", "less", "himself", "gray", "gorilla", "frequently"]
 
-**To Do:**
-
-* improve performance of script
-* allow certain configurations (half done)
-* try to use http://yeoman.io/ with its structure for more compatibility and understanding
-
-**USAGE**
+**Usage**
 
 * start your redis server (http://redis.io/topics/quickstart)
 * clone this repo "git clone https://github.com/monbro/opensemanticapi.git"
 * change config if needed in "/config.js"
 * open folder of the clones repo in console and start the node server with "node app.js"
 * the longer it collects data the better the results should be
+
+**To Do:**
+
+* improve performance of script
+* allow certain configurations (half done)
+* try to use http://yeoman.io/ with its structure for more compatibility and understanding
