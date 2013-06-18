@@ -172,7 +172,7 @@ function analyzeText(snippet) {
 
 }
 
-// wikiSearch('datenbank');
+wikiSearch('datenbank');
 
 // 2do:
 // remove bindewürter und wir ihr sie etc.
@@ -214,7 +214,7 @@ function Base(val) {
       // });
       // console.log(items);
 
-          client.sort(val, "by", val+":*", 'LIMIT', 0, 200, 'DESC', "get", "#", function (err2, items2) {
+          client.sort(val, "by", val+":*", 'LIMIT', 0, 120, 'DESC', "get", "#", function (err2, items2) {
             // client.get(val+':'+items[0],function (err, item) {
             //   console.log(item);
             // });
