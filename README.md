@@ -23,7 +23,7 @@ The following examples where given after the system was collecting for about one
 
 * Input: "human"
 
-* Output: ["evolution", "humans", "reality", "primate", "ago", "tools", "pmid", "mind"]
+* Output: ["humans", "evolution", "primates", "ago", "ado", "studies", "physiology", "bonobo"]
 
 **3. Example (http://localhost:8080/relations/dog):**
 
