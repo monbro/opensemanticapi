@@ -7,6 +7,8 @@ opensemanticapi
 
 Will allow you to create your own semantic wording database with redis. Otherwise there will be a open api to get related words by meaning.
 
+![ScreenShot](https://raw.github.com/monbro/opensemanticapi/master/infographic.png)
+
 **1. Example (http://localhost:8080/relations/hund):**
 
 * Input: "hund" (german word)
