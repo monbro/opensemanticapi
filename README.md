@@ -27,8 +27,8 @@ Will allow you to create your own semantic wording database with redis. Otherwis
 
 **To Do:**
 
-* Remove all conjunctions and stuff
 * improve performance of script
+* allow certain configurations
 * try to use http://yeoman.io/ with its structure for more compatibility and understanding
 
 **USAGE**
