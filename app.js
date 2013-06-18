@@ -133,7 +133,7 @@ function analyzeText(snippet) {
 
     multi.sadd('____sites2do____',words[i]);
 
-    // console.log(words[i].toLowerCase()+' - '+words[j].toLowerCase()+' - '+similar_text(words[i].toLowerCase(),words[j].toLowerCase(),1));
+    // console.log(words[i].toLowerCase()+'¥ - '+words[j].toLowerCase()+' - '+similar_text(words[i].toLowerCase(),words[j].toLowerCase(),1));
   }
 
   // console.log(obj);
@@ -172,12 +172,17 @@ function analyzeText(snippet) {
 
 }
 
-wikiSearch('datenbank');
+// wikiSearch('datenbank');
 
 // 2do:
 // remove bindewürter und wir ihr sie etc.
 // crawl all wikipedia links upcoming in this article
 
+function inAButNotInB(A, B) {
+  return _.filter(A, function (d) {
+    return !_.contains(B, d);
+  });
+}
 
 // Base Class
 ///////////////////////////////////////////////////////
@@ -203,13 +208,25 @@ function Base(val) {
     var all_users = [];
     // Get all the users for this page.
 
-    client.sort(val, "by", val+":*", 'LIMIT', 0, 120, 'DESC', "get", "#", function (err, items) {
+     client.sort('____all____', "by", "____all____:*", 'LIMIT', 0, 500, 'DESC', "get", "#", function (err1, items1) {
       // client.get(val+':'+items[0],function (err, item) {
       //   console.log(item);
       // });
       // console.log(items);
-      doResponse(items,res);
+
+          client.sort(val, "by", val+":*", 'LIMIT', 0, 200, 'DESC', "get", "#", function (err2, items2) {
+            // client.get(val+':'+items[0],function (err, item) {
+            //   console.log(item);
+            // });
+            // console.log(items);
+
+            doResponse(inAButNotInB(items2,items1),res);
+          });
+
+
     });
+
+
 
   //   client.smembers(val, function (err, items ) {
   //     // Now get the name of each of those users.
