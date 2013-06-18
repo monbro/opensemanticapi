@@ -40,3 +40,5 @@ Will allow you to create your own semantic wording database with redis. Otherwis
 * improve performance of script
 * allow certain configurations (half done)
 * try to use http://yeoman.io/ with its structure for more compatibility and understanding
+
+This software is published under the MIT-License. See 'license' for more information.
