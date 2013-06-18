@@ -1,70 +1,91 @@
+
+/**
+ * This class will scrape wikipedia articles and build out of it a datamase which can be searched in a semantic way.
+ * The density count of keywords in a small local place (textblock) allows us to detect related keywords in a semantic way
+ *
+ * @author Michael Klein <klein@monbro.de>
+ * @url http://open-semantic.com/
+ * @package opensemanticapi
+ * @version 0.1
+ */
+
+/* Used variables names
+ * ____sites____ = wikipedia page titles which were scraped already
+ * ____sites2do____ = wikipedia page titles which are queued to scrape
+ * ____all____ = a collection of all ever seen words with a increment number
+ */
+
+/** 
+ * Modules
+ */
 var restify = require('restify');
 var express = require('express');
 var config = require('./config.js');
 var tools = require('./lib/tools');
-// var mongoose = require('mongoose');
-
 var redis = require("redis");
+// var mongoose = require('mongoose');
 var _ = require("underscore");
 var $ = require("jquery");
+
+/** 
+ * Objects
+ */
+
+// create redis client
 var client = redis.createClient();
 var multi;
-// var stream = client.stream(); 
 
-// client.set("string key", "string val", redis.print);
-// client.hset("hash key", "hashtest 1", "some value", redis.print);
-// client.hset(["hash key", "hashtest 2", "some other value"], redis.print);
-// client.hkeys("hash key", function (err, replies) {
-//   console.log(replies.length + " replies:");
-//   replies.forEach(function (reply, i) {
-//     console.log("    " + i + ": " + reply);
-//   });
-//   client.quit();
-// });
-
+// create restify server to server http api
 var server = restify.createServer();
 server.use(restify.bodyParser());
 
+// create restify json client for api requests
 var wikipedia = restify.createJsonClient({
-  url: 'http://de.wikipedia.org',
+  url: 'http://'+config.creds.lang+'.wikipedia.org',
   version: '*'
 });
 
-// db = mongoose.connect(config.creds.mongoose_auth_local),
-// Schema = mongoose.Schema;
+/** 
+ * Run
+ */
 
-// // Create a schema for our data
-// var WordSchema = new Schema({
-//   name: String,
-//   count: Number
-// });
-// // Use the schema to register a model with MongoDb
-// mongoose.model('Word', WordSchema);
-// var Word = mongoose.model('Word');
+// start api requests with given keyword
+wikiSearch('database');
 
-// Try do a request cronjob preparation
+/** 
+ * Helper functions
+ */
+
+/** 
+ * function wikiSearch will start the main processes to search for the best wikipedia page for the given string
+ *
+ * @param string term
+ * @return boolean
+ */
 function wikiSearch(term) {
+  // do api call
   wikipedia.get('/w/api.php?action=opensearch&search='+escape(term)+'&format=json&limit=3', function(err, req, res, data) {
 
-    // console.log(err);
-    // console.log(data);
-
     if(typeof data[1] == 'undefined' || typeof data[1][0] == 'undefined') {
-      console.log('No page found in wikipedia for '+req.path);
+      if(config.creds.debug)
+        console.log('No page found in wikipedia for '+req.path);
       client.srem('____sites2do____',term);
       goToNext();
       return;
     }
 
+    // get first matching result
     var firstTitle = data[1][0];
 
+    // set first result as done
     client.sadd('____sites____', firstTitle, function (err, result) {
       if(result) {
         wikiGrab(firstTitle);
         client.srem('____sites2do____',firstTitle);
       }
       else {
-        console.log(firstTitle+' was crawled already!');
+        if(config.creds.debug)
+          console.log(firstTitle+' was crawled already!');
         goToNext();
         return false;
       }
@@ -78,276 +99,219 @@ function wikiSearch(term) {
   });
 }
 
+/** 
+ * function wikiGrab will get the content for the given wikipedia page title
+ *
+ * @param string title
+ * @return boolean
+ */
 function wikiGrab(title) {
+  // do the api call
   wikipedia.get('/w/api.php?rvprop=content&format=json&prop=revisions|categories&rvprop=content&action=query&titles='+escape(title), function(err, req, res, data) {
     if(typeof data.query == 'undefined') {
       goToNext();
       return false;
     }
 
+    // check if valid content
     if(typeof data.query.pages[Object.keys(data.query.pages)[0]].revisions == 'undefined') {
       goToNext();
       return false;
     }
 
+    // get the main content of the wikipedia page
     var rawtext = data.query.pages[Object.keys(data.query.pages)[0]].revisions[0]["*"];
+     // now split the whole content into text blocks
     var parts = rawtext.split(/\n|\r/);
     var snippets = [];
 
-    console.log('going to http://de.wikipedia.org/wiki/'+title);
+    if(config.creds.debug)
+      console.log('going to http://'+config.creds.lang+'.wikipedia.org/wiki/'+title);
 
+    // loop all text blocks and pull these with more than config.creds.min_text_block_length (default: 120) chars
     for (var i = parts.length - 1; i >= 0; i--) {
-      if(parts[i].length > 120) {
+      if(parts[i].length > config.creds.min_text_block_length) {
         snippets.push(parts[i]);
 
         // analyze full text block
         analyzeText(parts[i]);
       }
       if(i === 0) {
+        // when last element, start again
         goToNext();
       }
     }
-    console.log('Count of snippets: '+snippets.length);
+    if(config.creds.debug)
+      console.log('Count of snippets: '+snippets.length);
   });
 }
 
+/** 
+ * function goToNext will move on to a random element to search for in the queue ____sites2do____ which is stored in redis
+ *
+ * @param
+ * @return
+ */
 function goToNext() {
-  console.log('NEXT');
+  if(config.creds.debug)
+    console.log('NEXT');
   client.srandmember('____sites2do____', function (err, result) {
     wikiSearch(result);
   });
 }
 
+/** 
+ * function analyzeText will get the content for the given wikipedia page title
+ *
+ * @param string title
+ * @return boolean
+ */
 function analyzeText(snippet) {
+
+  // split the text block to words
   var words = tools.tokenize(snippet);
+
+  // create empty object
   var obj = {};
 
   multi = client.multi();
 
+  // loop all words
   for (var i = words.length - 1; i >= 0; i--) {
 
-    if(typeof obj[words[i]] == 'undefined')
-      obj[words[i]] = 1;
+    // count all seen words
+    if(typeof obj[words[i].toLowerCase()] == 'undefined')
+      obj[words[i].toLowerCase()] = 1;
     else
-      obj[words[i]]++;
+      obj[words[i].toLowerCase()]++;
 
-    multi.sadd('____sites2do____',words[i]);
+    // add every word to the queue to spread the scrape
+    multi.sadd('____sites2do____',words[i].toLowerCase());
 
-    // console.log(words[i].toLowerCase()+'¥ - '+words[j].toLowerCase()+' - '+similar_text(words[i].toLowerCase(),words[j].toLowerCase(),1));
+    // if(config.creds.debug)
+    //   console.log(words[i].toLowerCase()+'¥ - '+words[j].toLowerCase()+' - '+similar_text(words[i].toLowerCase(),words[j].toLowerCase(),1));
   }
 
-  // console.log(obj);
-
   $.each(obj, function(index, value) {
-    // console.log(index + ': ' + value);
 
-    if(typeof index == 'undefined')
-      return; // skip to next
+    // skip if not valid
+    if(typeof index == 'undefined' || typeof index.toLowerCase == 'undefined')
+      return;
 
+    // create new obj from class Base, make sure to work with lowercase only
     base = new Base(index.toLowerCase());
+
+    // loop all words
     $.each(obj, function(index2, value2) {
       if(index != index2) {
+        // add relation, value2 is the counter of how often the word was seen in the recent textblock
         base.pushRelation(index2.toLowerCase(),value2);
       }
     });
+
     base.save();
 
     // add to our general 'ALL' collection, to identify the most used words of all
-    multi.sadd('____all____', index.toLowerCase());
-    multi.incrby('____all____'+':'+index.toLowerCase(), value);
-
-//     client.multi()
-// .hmset(randKey, {"author": params.author,
-// "quote": params.quote})
-// .sadd('Author:' + params.author, randKey)
-
-// .exec(function (err, replies) {
-// if (err) { throw err; };
-// if (replies[0] == "OK") { console.log('Added...\n'); }
-// });
+    multi.sadd('____all____', index.toLowerCase()); // add keyword
+    multi.incrby('____all____'+':'+index.toLowerCase(), value); // track its density
 
   });
 
   multi.exec();
-
 }
 
-wikiSearch('datenbank');
-
-// 2do:
-// remove bindewürter und wir ihr sie etc.
-// crawl all wikipedia links upcoming in this article
-
+/** 
+ * function inAButNotInB will remove all items from array a which are in array b
+ * depending on underscore.js
+ *
+ * @param
+ * @return
+ */
 function inAButNotInB(A, B) {
   return _.filter(A, function (d) {
     return !_.contains(B, d);
   });
 }
 
-// Base Class
-///////////////////////////////////////////////////////
+/** 
+ * class Base will get handle database-actions related to one keyword
+ *
+ * @param string val
+ * @return boolean
+ */
 function Base(val) {
 
   // Store variables
   var that = this,
-      multi_in = client.multi(),
+      multi_in = client.multi(), // to pipeline actions for redis
       res;
 
+  // to set the restify response, a bit hacky actually
   this.setRes = function(val) {
     res = val;
   };
 
+  // process the pipelined actions in redis
   this.save = function() {
     multi_in.exec();
   };
 
-  // Public functions
+  // get all relationes, without the noise
   this.getTopRelations = function() {
-    // SORT items-set by items:* DESC
-
-    var all_users = [];
-    // Get all the users for this page.
-
-     client.sort('____all____', "by", "____all____:*", 'LIMIT', 0, 500, 'DESC', "get", "#", function (err1, items1) {
-      // client.get(val+':'+items[0],function (err, item) {
-      //   console.log(item);
-      // });
-      // console.log(items);
-
-          client.sort(val, "by", val+":*", 'LIMIT', 0, 120, 'DESC', "get", "#", function (err2, items2) {
-            // client.get(val+':'+items[0],function (err, item) {
-            //   console.log(item);
-            // });
-            // console.log(items);
-
-            doResponse(inAButNotInB(items2,items1),res);
-          });
-
-
+    // get most often used keywords (limit 500)
+    client.sort('____all____', "by", "____all____:*", 'LIMIT', 0, 500, 'DESC', "get", "#", function (err1, items1) {
+        // get most often realted keywords for the given keyword
+        client.sort(val, "by", val+":*", 'LIMIT', 0, 120, 'DESC', "get", "#", function (err2, items2) {
+          // remove the noise by removing the most often used keywords
+          doResponse(inAButNotInB(items2,items1),res);
+        });
     });
-
-
-
-  //   client.smembers(val, function (err, items ) {
-  //     // Now get the name of each of those users.
-  //     // console.log(items);
-
-  //     for (var i = 0; i < items.length; i++) {
-  //       console.log(items[i]);
-  //     }
-
-
-  //     // for (var i = 0; i < user_ids.length; i++) {
-  //     //  client.get(val + user_ids[i], function(err, count) {
-  //     //    var myobj = {};
-  //     //    myobj[user_ids[i]] = count;
-  //     //    all_users.push(myobj);
-  //     //       if (i === (user_ids.length - 1)) {
-  //     //          // console.log(all_users);
-  //     //          doResponse(all_users,res);
-  //     //       }
-  //     //   });
-  //     // }
-  //   });
-
   };
 
   // add word and count up
   this.pushRelation = function(rel, incr) {
     multi_in.sadd(val, rel);
-
     if(typeof incr == 'undefined') {
       incr = 1;
     }
     multi_in.incrby(val+':'+rel, incr);
-
   };
-
-  this.setTestData = function() {
-    that.pushRelation('eins');
-    that.pushRelation('zwo');
-    that.pushRelation('dree');
-
-    client.get(val+':eins', function (err, result3) {
-      console.log(result3);
-      doResponse(result3,res);
-    });
-  };
-
 }
 
-
+/** 
+ * function doResponse will send the response to the client
+ *
+ * @param string data
+ * @return res
+ */
 function doResponse(data, res) {
   res.send(data);
 }
 
+/** 
+ * function getRelations will take action as a router function to deliver all relations to the requested keyword
+ *
+ * @param string req.params.name
+ * @return boolean
+ */
 function getRelations(req, res, next) {
-
-  // client.set(req.params.name, "string val2", redis.print);
-  // client.incr(req.params.name+"_counter", "string val2", redis.print);
-
-  // var message = new Word();
-  // message.name = req.params.name;
-  // message.count = 0;
-  // message.save(function () {
-  //   // res.send(req.body);
-  //   console.log(req.body);
-  // });
-
-  // res.send(true);
-
-
-  // Resitify currently has a bug which doesn't allow you to set default headers
-  // This headers comply with CORS and allow us to server our response to any origin
-  // res.header("Access-Control-Allow-Origin", "http://www.yourdomain.com");
-  // res.header("Access-Control-Allow-Headers", "X-Requested-With");
-  // .find() without any arguments, will return all results
-  // the `-1` in .sort() means descending order
-  // Word.find({}).execFind(function (arr,data) {
-  //   res.send(data);
-  // });
- //  var output;
- // output = client.get(req.params.name);
- // console.log(output);
- // console.log(client.get(req.params.name));
-
-// how has using: http://stackoverflow.com/questions/5825485/how-to-get-count-of-values-in-redis-hash
-
-// our pratice
-// http://stackoverflow.com/questions/5118807/atomically-remove-an-item-from-set-if-a-counter-in-another-key-is-below-zero
-
-// list all
-// SMEMBERS items-set
-// get items:fooo
-
-//add one 
-// SADD "items-set" "fooo"
-
-// count up
-// INCR "items:foo0"
-
-  // client.get(req.params.name, function (err, result2) {
-  //     // res.send(result2);
-
-  // });
-
   var base = new Base(req.params.name);
   base.setRes(res);
   base.getTopRelations();
-  // client.quit();
 }
 
-function setTestData(req, res, next) {
-  var base = new Base(req.params.name);
-  base.setRes(res);
-  base.setTestData();
-  // client.quit();
-}
+/** 
+ * Routes
+ */
 
-// Set up our routes and start the server
+// Set up our routes
 server.get('/relations/:name', getRelations);
-server.get('/settestdata/:name', setTestData);
 
-server.listen(8080, function() {
+/** 
+ * Server
+ */
+
+// start the server
+server.listen(config.creds.server_port, function() {
   console.log('%s listening at %s', server.name, server.url);
 });
