@@ -1,7 +1,7 @@
 opensemanticapi
 ===============
 
-**Works with NodeJS and Redis - v0.1**
+**Works with NodeJS, Restify, UnderscoreJS and Redis - v0.1**
 
 **Description**
 
