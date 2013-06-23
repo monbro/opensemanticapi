@@ -36,7 +36,8 @@ The following examples where given after the system was collecting for about one
 * start your redis server (http://redis.io/topics/quickstart) on a disk with several free GB
 * clone this repo "git clone https://github.com/monbro/opensemanticapi.git"
 * change config if needed in "/config.js"
-* open folder of the clones repo in console and start the node server with "node app.js"
+* open repo folder in console and start the node server with the command "node app.js"
+* now it should print what it is collecting
 * the longer it collects data the better the results should be
 
 **To Do:**
