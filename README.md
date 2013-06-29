@@ -5,7 +5,7 @@ opensemanticapi
 
 **Description**
 
-Will allow you to create your own semantic wording database with redis. Otherwise there will be a open api to get related words by meaning.
+Will allow you to create your own semantic wording database with redis. Otherwise there will be a open api to get related words by meaning. You could say, this implementation is a light idea of this http://en.wikipedia.org/wiki/Latent_semantic_analysis
 
 ![ScreenShot](https://raw.github.com/monbro/opensemanticapi/master/infographic.png)
 
@@ -33,10 +33,13 @@ The following examples where given after the system was collecting for about one
 
 **Usage**
 
+* install npm if you have not already (http://nodejs.org/download)
 * start your redis server (http://redis.io/topics/quickstart) on a disk with several free GB
 * clone this repo "git clone https://github.com/monbro/opensemanticapi.git"
 * change config if needed in "/config.js"
-* open repo folder in console and start the node server with the command "node app.js"
+* open repo folder in console
+* enter "npm install" in console, it will install all dependencies automatically
+* start the node server with "node app.js"
 * now it should print what it is collecting
 * the longer it collects data the better the results should be
 

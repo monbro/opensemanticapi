@@ -33,7 +33,6 @@ var $ = require("jquery");
 
 // create redis client
 var client = redis.createClient();
-var multi;
 
 // create restify server to server http api
 var server = restify.createServer();
@@ -132,17 +131,41 @@ function wikiGrab(title) {
     for (var i = parts.length - 1; i >= 0; i--) {
       if(parts[i].length > config.creds.min_text_block_length) {
         snippets.push(parts[i]);
-
-        // analyze full text block
-        analyzeText(parts[i]);
-      }
-      if(i === 0) {
-        // when last element, start again
-        goToNext();
       }
     }
+
+    if(snippets.length > 0) {
+      // give the loop worker something to do
+      loopWorker(snippets);
+    }
+    else {
+      // restart fetch
+      goToNext();
+    }
+
+  });
+}
+
+/** 
+ * function loopWorker will process all snippets gently for your system
+ *
+ * @param array snippets
+ * @return
+ */
+function loopWorker(snippets) {
+  // when snippetbox is empty, restart fetch
+  if(snippets.length === 0) {
     if(config.creds.debug)
       console.log('Count of snippets: '+snippets.length);
+    goToNext();
+    return;
+  }
+
+  // analyze full text block
+  $.when(analyzeText(snippets.pop(),snippets.length)).done(function() {
+    // set a timeout to be gently to the memory and cpu 
+    // (can be changed in the config file)
+    var t=setTimeout(function(){loopWorker(snippets);},config.creds.sleeptime);
   });
 }
 
@@ -166,15 +189,18 @@ function goToNext() {
  * @param string title
  * @return boolean
  */
-function analyzeText(snippet) {
+function analyzeText(snippet,counter) {
 
   // split the text block to words
   var words = tools.tokenize(snippet);
 
+  if(config.creds.debug)
+      console.log('Count of words in snippet ('+counter+'): '+words.length);
+
   // create empty object
   var obj = {};
 
-  multi = client.multi();
+  var multi = client.multi();
 
   // loop all words
   for (var i = words.length - 1; i >= 0; i--) {
@@ -191,6 +217,8 @@ function analyzeText(snippet) {
     // if(config.creds.debug)
     //   console.log(words[i].toLowerCase()+'¥ - '+words[j].toLowerCase()+' - '+similar_text(words[i].toLowerCase(),words[j].toLowerCase(),1));
   }
+
+  var base;
 
   $.each(obj, function(index, value) {
 
@@ -217,7 +245,9 @@ function analyzeText(snippet) {
 
   });
 
-  multi.exec();
+  multi.exec(function(err, replies) {
+      return true;
+  });
 }
 
 /** 
