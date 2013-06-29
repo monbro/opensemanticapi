@@ -42,7 +42,7 @@ The following examples where given after the system was collecting for about one
 * start the node server with "node app.js"
 * now it should print what it is collecting
 * the longer it collects data the better the results should be
-* now you can access the relations trough your browser like http://localhost:8080/relations/database
+* now you can access the relations through your browser like http://localhost:8080/relations/database or direct by accessing your redis server
 
 **To Do:**
 
