@@ -5,7 +5,7 @@ opensemanticapi
 
 **Description**
 
-Will allow you to create your own semantic wording database with redis. Otherwise there will be a open api to get related words by meaning. You could say, this implementation is a light idea of this http://en.wikipedia.org/wiki/Latent_semantic_analysis
+Will allow you to create your own semantic wording database with redis. Otherwise there will be a open api to get related words by meaning. You could say, this implementation is a light version of the idea behind http://en.wikipedia.org/wiki/Latent_semantic_analysis
 
 ![ScreenShot](https://raw.github.com/monbro/opensemanticapi/master/infographic.png)
 
@@ -31,17 +31,18 @@ The following examples where given after the system was collecting for about one
 
 * Output: ["infant", "wildlife", "offspring", "mother", "future", "southwest", "koalas", "conflict", "animals", "aitken", "wolf", "urban", "rehabilitation", "pet", "perspective", "nursing", "mexico", "evolutionary", "weaning", "ticket", "texas", "speech", "special", "retrospective", "primate", "holtcamp", "fund", "enough", "domestic", "cost", "arizona", "210–217", "variety", "trivers", "trauma", "terms", "sprawl", "southwestern", "sense", "river", "received", "questions", "point", "perhaps", "parent", "otter", "makes", "little", "less", "himself", "gray", "gorilla", "frequently"]
 
-**Usage**
+**Installation Guide**
 
-* install npm if you have not already (http://nodejs.org/download)
-* start your redis server (http://redis.io/topics/quickstart) on a disk with several free GB
+* install npm and node if you have not already (http://howtonode.org/introduction-to-npm or http://nodejs.org/)
+* install / start your redis server (http://redis.io/topics/quickstart) on a disk with several free GB
 * clone this repo "git clone https://github.com/monbro/opensemanticapi.git"
 * change config if needed in "/config.js"
-* open repo folder in console
-* enter "npm install" in console, it will install all dependencies automatically
+* open the repository folder in your console
+* enter "npm install", it will install all dependencies automatically
 * start the node server with "node app.js"
 * now it should print what it is collecting
 * the longer it collects data the better the results should be
+* now you can access the relations trough your browser like http://localhost:8080/relations/database
 
 **To Do:**
 
