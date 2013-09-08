@@ -49,5 +49,9 @@ The following examples where given after the system was collecting for about one
 * improve performance of script
 * allow certain configurations (half done)
 * try to use http://yeoman.io/ with its structure for more compatibility and understanding
+* write tests
+* connect to travis-ci
+* better folder structure
+* write version using level db or similar
 
 This software is published under the MIT-License. See 'license' for more information.
