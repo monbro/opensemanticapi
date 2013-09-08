@@ -49,7 +49,7 @@ var wikipedia = restify.createJsonClient({
  */
 
 // start api requests with given keyword
-wikiSearch('database');
+// wikiSearch('database');
 
 /** 
  * Helper functions
@@ -178,8 +178,9 @@ function loopWorker(snippets) {
 function goToNext() {
   if(config.creds.debug)
     console.log('NEXT');
-  client.srandmember('____sites2do____', function (err, result) {
-    wikiSearch(result);
+  client.smembers('____sites2do____', function (err, result) {
+    var randomnr=Math.floor(Math.random()*result.length);
+    wikiSearch(result[randomnr]);
   });
 }
 
@@ -289,7 +290,9 @@ function Base(val) {
   // get all relationes, without the noise
   this.getTopRelations = function() {
     // get most often used keywords (limit 500)
-    client.sort('____all____', "by", "____all____:*", 'LIMIT', 0, 500, 'DESC', "get", "#", function (err1, items1) {
+    client.smembers('____all____', function (err1, items1) {
+      console.log(items1);
+      return;
         // get most often realted keywords for the given keyword
         client.sort(val, "by", val+":*", 'LIMIT', 0, 120, 'DESC', "get", "#", function (err2, items2) {
           // remove the noise by removing the most often used keywords
