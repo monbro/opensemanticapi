@@ -35,12 +35,14 @@ The following examples where given after the system was collecting for about one
 
 * install npm and node if you have not already (http://howtonode.org/introduction-to-npm or http://nodejs.org/)
 * install / start your redis server (http://redis.io/topics/quickstart) on a disk with several free GB
+
 * clone this repo "git clone https://github.com/monbro/opensemanticapi.git"
 * change config if needed in "/config.js"
+* NOTE: depending on what you want (scraper / cronjob to run or http api server, set 'http_server' to true or false)
 * open the repository folder in your console
 * enter "npm install", it will install all dependencies automatically
 * start the node server with "node app.js"
-* now it should print what it is collecting
+* now it should print what it is collecting or what http route is requested
 * the longer it collects data the better the results should be
 * now you can access the relations through your browser like http://localhost:8080/relations/database or direct by accessing your redis server
 
@@ -49,5 +51,9 @@ The following examples where given after the system was collecting for about one
 * improve performance of script
 * allow certain configurations (half done)
 * try to use http://yeoman.io/ with its structure for more compatibility and understanding
+* write tests
+* connect to travis-ci
+* better folder structure
+* write version using level db or similar
 
 This software is published under the MIT-License. See 'license' for more information.
