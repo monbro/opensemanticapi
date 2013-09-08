@@ -1,5 +1,5 @@
-opensemanticapi
-===============
+opensemanticapi - LEVELDB PORT
+==============================
 
 **Works with NodeJS, Restify, UnderscoreJS and Redis - v0.1**
 
@@ -34,7 +34,7 @@ The following examples where given after the system was collecting for about one
 **Installation Guide**
 
 * install npm and node if you have not already (http://howtonode.org/introduction-to-npm or http://nodejs.org/)
-* install / start your redis server (http://redis.io/topics/quickstart) on a disk with several free GB
+* install / start the redis server port (https://github.com/KDr2/redis-leveldb) on a disk with several free GB
 
 * clone this repo "git clone https://github.com/monbro/opensemanticapi.git"
 * change config if needed in "/config.js"
@@ -45,6 +45,9 @@ The following examples where given after the system was collecting for about one
 * now it should print what it is collecting or what http route is requested
 * the longer it collects data the better the results should be
 * now you can access the relations through your browser like http://localhost:8080/relations/database or direct by accessing your redis server
+
+**BUGLIST**
+* currently sort() is not available, so it will stuck in app/db.js line 89 and 91
 
 **To Do:**
 
