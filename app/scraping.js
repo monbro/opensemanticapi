@@ -28,6 +28,8 @@ Scraper.prototype.wikiSearch = function(s) {
         return;
     }
 
+    console.log('http://'+config.creds.lang+'.wikipedia.org/w/api.php?action=opensearch&search='+escape(s)+'&format=json&limit=3');
+
     wikipedia.get('/w/api.php?action=opensearch&search='+escape(s)+'&format=json&limit=3', function(err, req, res, data) {
         if(typeof data[1] == 'undefined' || typeof data[1][0] == 'undefined') {
           if(config.creds.debug) {
