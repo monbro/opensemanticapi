@@ -1,3 +1,7 @@
+'use strict';
+
+var require = require || {};
+var console = console || {};
 
 /**
  * This class will scrape wikipedia articles and build out of it a datamase which can be searched in a semantic way.
@@ -26,8 +30,9 @@ var app = new App();
 
 var Model = require('./app/model');
 
+// model factory, not used jet
 App.prototype.getModel = function(s) {
-  return new Model(s); 
+  // return new Model(s);
 };
 
 // var test = app.getModel('test');
@@ -35,7 +40,8 @@ App.prototype.getModel = function(s) {
 
 if(!config.creds.http_server) {
     var Scraper = require("./app/scraping");
-    var scraper = new Scraper();
+    var scraper = Scraper;
+    scraper.init();
 
     // Start Cronjob
     scraper.wikiSearch('database');
@@ -48,5 +54,5 @@ if(!config.creds.http_server) {
 // Start HTTP API RESTFUL Server
 if(config.creds.http_server) {
     var Http = require("./app/http");
-    var http = new Http(); 
+    var http = new Http();
 }

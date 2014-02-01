@@ -1,57 +1,71 @@
+'use strict';
+
+var require = require || {};
+var module = module || {};
+var console = console || {};
+
 var config = require('../config.js');
 
 // choose only one of the database ports
-var Db_port = require("./db_redis");
+var DbPort = require("./db_redis");
 // var db_port = require("./db_cassandra");
 // var db_port = require("./db_hbase");
 
-var Db = function() {
-    that = this;
-    db_port = new Db_port();
-};
+var that, dbPort;
 
-Db.prototype.enableMulti = function() {
-    db_port.enableMulti();
-};
+var Db = {
 
-Db.prototype.disableMulti = function() {
-    db_port.disableMulti();
-};
+    init: function() {
+        that = this;
+        dbPort = DbPort;
+        dbPort.init();
+    },
 
-Db.prototype.addPageToQueue = function(s) {
-    db_port.addPageToQueue(s);
-};
+    enableMulti: function() {
+        dbPort.enableMulti();
+    },
 
-Db.prototype.removePageFromQueue = function(s) {
-    db_port.removePageFromQueue(s);
-};
+    disableMulti: function() {
+        dbPort.disableMulti();
+    },
 
-Db.prototype.getRandomItemFromQueue = function(callback) {
-    db_port.getRandomItemFromQueue(callback);
-};
+    addPageToQueue: function(s) {
+        dbPort.addPageToQueue(s);
+    },
 
-Db.prototype.addPageAsDone = function(s, callback) {
-    db_port.addPageAsDone(s, callback);
-};
+    removePageFromQueue: function(s) {
+        dbPort.removePageFromQueue(s);
+    },
 
-Db.prototype.removePageAsDone = function(s, callback) {
-    db_port.removePageAsDone(s, callback);
-};
+    getRandomItemFromQueue: function(callback) {
+        dbPort.getRandomItemFromQueue(callback);
+    },
 
-Db.prototype.addRelation = function(owner,relation,i) {
-    db_port.addRelation(owner,relation,i);
-};
+    addPageAsDone: function(s, callback) {
+        dbPort.addPageAsDone(s, callback);
+    },
 
-Db.prototype.addToGlobalCounter = function(owner,s) {
-    db_port.addToGlobalCounter(owner,s);
-};
+    removePageAsDone: function(s, callback) {
+        dbPort.removePageAsDone(s, callback);
+    },
 
-Db.prototype.getTopRelations = function(owner, callback, res) {
-    db_port.getTopRelations(owner, callback, res);
-};
+    addRelation: function(owner,relation,i) {
+        dbPort.addRelation(owner,relation,i);
+    },
+    
+    addToGlobalCounter: function(owner,s) {
+        dbPort.addToGlobalCounter(owner,s);
+    },
 
-Db.prototype.flush = function(callback) {
-    db_port.flush(callback);
+
+    getTopRelations: function(owner, callback, res) {
+        dbPort.getTopRelations(owner, callback, res);
+    },
+
+    flush: function(callback) {
+        dbPort.flush(callback);
+    }
+
 };
 
 module.exports = Db;

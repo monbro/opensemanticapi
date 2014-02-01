@@ -1,13 +1,25 @@
-var Model = function(s) { 
-  val = s || null;
-};
+'use strict';
 
-Model.prototype.getValue = function() { 
-  return val; 
-};
+var require = require || {};
+var module = module || {};
+var console = console || {};
 
-Model.prototype.setValue = function(s) { 
-  val = s; 
+var val;
+
+var Model = {
+
+    init: function(s) {
+        val = s || null;
+    },
+
+    getValue: function() {
+      return val;
+    },
+
+    setValue: function(s) {
+      val = s;
+    }
+  
 };
 
 module.exports = Model;
