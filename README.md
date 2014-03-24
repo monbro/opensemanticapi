@@ -1,5 +1,11 @@
-opensemanticapi
-===============
+opensemanticapi with NodeJS
+===========================
+
+This project exists in two different languages:
+* [go lang](https://github.com/monbro/opensemanticapi-go-lang)
+* [NodeJS](https://github.com/monbro/opensemanticapi)
+
+===========================
 
 **Works with NodeJS, Restify, UnderscoreJS and Redis**
 
