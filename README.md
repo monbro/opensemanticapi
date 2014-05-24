@@ -62,4 +62,6 @@ The following examples where given after the system was collecting for about one
 * better folder structure
 * write version using level db or similar
 
+To support this project, please consider to [donate](https://www.gittip.com/monbro/).
+
 This software is published under the MIT-License. See 'license' for more information.
