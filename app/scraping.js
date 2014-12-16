@@ -2,7 +2,6 @@ var Db = require('./db');
 var Analyse = require('./analyse');
 var restify = require('restify');
 var config = require('../config.js');
-var $ = require("jquery");
 
 var Scraper = function() {
     db = new Db();
@@ -17,7 +16,7 @@ var Scraper = function() {
 
 Scraper.prototype.wikiSearch = function(s) {
     if(config.creds.debug) {
-        console.log('wikiSearch');
+        console.log('wikiSearch with: '+s);
     }
 
     // check if not empty string
@@ -65,13 +64,13 @@ Scraper.prototype.wikiSearch = function(s) {
           db.addPageToQueue(data[1][i]);
         }
 
-        if(config.creds.debug) {
+        if(config.creds.debug_once) {
             debug_once = true;
         }
     });
 };
 
-Scraper.prototype.wikiGrab = function(s) { 
+Scraper.prototype.wikiGrab = function(s) {
     if(config.creds.debug) {
         console.log('wikiGrab with '+s);
     }
@@ -118,7 +117,7 @@ Scraper.prototype.wikiGrab = function(s) {
     });
 };
 
-Scraper.prototype.loopWorker = function(snippets) { 
+Scraper.prototype.loopWorker = function(snippets) {
     if(config.creds.debug) {
         console.log('loopWorker');
     }
@@ -131,15 +130,12 @@ Scraper.prototype.loopWorker = function(snippets) {
         return;
     }
 
-    // analyze full text block
-    $.when(analyse.scanTextBlock(snippets.pop(),snippets.length)).done(function() {
-        // set a timeout to be gently to the memory and cpu 
-        // (can be changed in the config file)
+    analyse.scanTextBlock(snippets.pop(),snippets.length,function() {
         var t=setTimeout(function(){that.loopWorker(snippets);},config.creds.sleeptime);
     });
 };
 
-Scraper.prototype.goToNext = function() { 
+Scraper.prototype.goToNext = function() {
     if(config.creds.debug) {
         console.log('goToNext');
     }

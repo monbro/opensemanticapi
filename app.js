@@ -9,12 +9,12 @@
  * @version 0.1
  */
 
-/** 
+/**
  * laod config
  */
 var config = require('./config');
 
-/** 
+/**
  * Basic Objects
  */
 
@@ -27,7 +27,7 @@ var app = new App();
 var Model = require('./app/model');
 
 App.prototype.getModel = function(s) {
-  return new Model(s); 
+  return new Model(s);
 };
 
 // var test = app.getModel('test');
@@ -41,12 +41,12 @@ if(!config.creds.http_server) {
     scraper.wikiSearch('database');
 }
 
-/** 
+/**
  * Server
  */
 
 // Start HTTP API RESTFUL Server
 if(config.creds.http_server) {
     var Http = require("./app/http");
-    var http = new Http(); 
+    var http = new Http();
 }

@@ -44,7 +44,7 @@ Db.prototype.removePageFromQueue = function(s) {
 
 Db.prototype.getRandomItemFromQueue = function(callback) {
     client.srandmember('____sites2do____', function (err, result) {
-        return callback(result);
+        callback(result);
     });
 };
 
@@ -86,9 +86,10 @@ Db.prototype.addToGlobalCounter = function(owner,s) {
 };
 
 Db.prototype.getTopRelations = function(owner, callback, res) {
-    client.sort('____all____', "by", "____all____:*", 'LIMIT', 0, 500, 'DESC', "get", "#", function (err1, items1) {
+    client.sort('____all____', "by", "____all____:*", 'LIMIT', 0, 300, 'DESC', "get", "#", function (err1, items1) {
         // get most often realted keywords for the given keyword
         client.sort(owner, "by", owner+":*", 'LIMIT', 0, 120, 'DESC', "get", "#", function (err2, items2) {
+
           // remove the noise by removing the most often used keywords
           callback(tools.inAButNotInB(items2,items1),res);
         });

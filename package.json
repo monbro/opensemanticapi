@@ -7,8 +7,7 @@
     "restify": "2.x",
     "mongoose": "3.x.x",
     "redis": "0.8.x",
-    "underscore": "1.x.x",
-    "jquery": "1.x.x"
+    "underscore": "1.x.x"
   },
   "repository": {
     "type": "git",

@@ -5,7 +5,8 @@ exports.creds = {
   sleeptime: 0, // sleep time in ms between the iteration of all textblocks
   mongoose_auth_local: 'mongodb://localhost/opensemanticapi', // default: mongodb://localhost/opensemanticapi
   min_text_block_length: 120, // default: 120
-  debug: false, // default: true
+  debug: true, // default: true
+  debug_once: false,
   lang: 'en' // default: english
   // lang: 'de' // german
   // lang: 'es' // spanish

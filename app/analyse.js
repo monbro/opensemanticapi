@@ -1,7 +1,7 @@
 var Tools = require('../lib/tools');
 var Db = require('./db');
 var config = require('../config.js');
-var $ = require("jquery");
+var _ = require("underscore");
 
 var Analyse = function() {
     tools = Tools;
@@ -9,7 +9,7 @@ var Analyse = function() {
     db = new Db();
 };
 
-Analyse.prototype.scanTextBlock = function(snippet,counter) {
+Analyse.prototype.scanTextBlock = function(snippet,counter, callback) {
     if(config.creds.debug) {
         console.log('scanTextBlock');
     }
@@ -44,7 +44,7 @@ Analyse.prototype.scanTextBlock = function(snippet,counter) {
 
       // var base;
 
-      $.each(obj, function(index, value) {
+      _.each(obj, function(value, index) {
 
         // skip if not valid
         if(typeof index == 'undefined' || typeof index.toLowerCase == 'undefined')
@@ -54,7 +54,7 @@ Analyse.prototype.scanTextBlock = function(snippet,counter) {
         // base = new Base(index.toLowerCase());
 
         // loop all words
-        $.each(obj, function(index2, value2) {
+        _.each(obj, function(value2, index2) {
           if(index != index2) {
             // add relation, value2 is the counter of how often the word was seen in the recent textblock
             // base.pushRelation(index2.toLowerCase(),value2);
@@ -73,6 +73,7 @@ Analyse.prototype.scanTextBlock = function(snippet,counter) {
 
     // flush changes to database
     db.flush(function(err, replies) {
+        callback();
         return true;
     });
 
