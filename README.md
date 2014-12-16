@@ -52,7 +52,7 @@ The following examples where given after the system was collecting for about one
 * the longer it collects data the better the results should be
 * now you can access the relations through your browser like http://localhost:8080/relations/database or direct by accessing your redis server
 
-**To Do:**
+**To Do**
 
 * improve performance of script
 * allow certain configurations (half done)
@@ -61,6 +61,15 @@ The following examples where given after the system was collecting for about one
 * connect to travis-ci
 * better folder structure
 * write version using level db or similar
+
+**Related Links**
+
+* http://redis.io/commands/
+* https://textalytics.com/home
+* http://wordnet.princeton.edu/
+* http://deeplearner.fz-qqq.net/
+* https://code.google.com/p/word2vec/
+* http://commoncrawl.org/what-you-can-do/
 
 To support this project, please consider to [donate](https://www.gittip.com/monbro/).
 
